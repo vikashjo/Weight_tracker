@@ -1,6 +1,6 @@
 class WeightsController < ApplicationController
   before_action :set_weight, only: %i[ show edit update destroy ]
-  before_action :authenticatte_user!
+  before_action :authenticate_user!
 
   # GET /weights or /weights.json
   def index

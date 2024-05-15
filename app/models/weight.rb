@@ -1,5 +1,6 @@
 class Weight < ApplicationRecord
   belongs_to :user
+  before_save :convert_to_kilograms
   validates :value, presence: true, numericality: { greater_than: 0 }
 
   def self.kg_to_lbs(kilograms)
@@ -19,6 +20,15 @@ class Weight < ApplicationRecord
       Weight.lbs_to_kg(value)
     else
       value
+    end
+  end
+
+  private
+
+  def convert_to_kilograms
+    if unit == 'lbs'
+      self.value = Weight.lbs_to_kg(value)
+      self.unit = 'kg'
     end
   end
 end
