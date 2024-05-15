@@ -4,8 +4,18 @@ class WeightsController < ApplicationController
 
   # GET /weights or /weights.json
   def index
-   @pagy, @weights = pagy(current_user.weights.order(date: :desc ))
+   @pagy,  @weights = pagy(current_user.weights.order(date: :desc ))
   end
+
+  def dashboard
+    @weights = current_user.weights.where(date: date_range )
+    @averages = @weights.group(:date).average(:value)
+    respond_to do |format|
+      format.html
+      format.json  { render json: @averages }
+    end
+  end
+
 
   # GET /weights/1 or /weights/1.json
   def show
@@ -22,7 +32,7 @@ class WeightsController < ApplicationController
 
   # POST /weights or /weights.json
   def create
-    @weight = Weight.new(weight_params)
+    @weight = Weight.new(weight_params.merge(user: current_user ))
 
     respond_to do |format|
       if @weight.save
@@ -62,10 +72,11 @@ class WeightsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_weight
       @weight = Weight.find(params[:id])
+      redirect_to weights_url, noticce: "You are not authorised to view this weight." unless  @weight.user == current_user
     end
 
     # Only allow a list of trusted parameters through.
     def weight_params
-      params.require(:weight).permit(:value, :date, :user_id, :unit)
+      params.require(:weight).permit(:value, :date, :unit)
     end
 end
